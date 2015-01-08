@@ -505,6 +505,9 @@ TreeMaker::beginJob()
   {
     std::vector<int> vector;
     VectorIntVector_.push_back(vector);
+	}
+	for(unsigned int i=0; i< VectorIntNames_.size();i++)
+	{
     std::string tempFull = VectorIntNames_[i];
     std::string nameInTree = VectorIntNames_[i];
     std::string tag = VectorIntNames_[i];
@@ -522,6 +525,9 @@ TreeMaker::beginJob()
   {
     std::vector<double> vector;
     VectorDoubleVector_.push_back(vector);
+	}
+	for(unsigned int i=0; i< VectorDoubleNames_.size();i++)
+	{
     std::string tempFull = VectorDoubleNames_[i];
     std::string nameInTree = VectorDoubleNames_[i];
     std::string tag = VectorDoubleNames_[i];
@@ -530,15 +536,19 @@ TreeMaker::beginJob()
       tag = SeparateString(tempFull,"(").first;
       nameInTree = SeparateString(SeparateString(tempFull,"(").second,")").first;
     }
-    std::cout<<"VectorDoubleNames_: tag:"<<tag<<" nameInTree: "<<nameInTree<<" originial full name: "<<tempFull<<std::endl;
+    
     VectorDoubleTags_.push_back(edm::InputTag(tag));
     nameInTree.erase (std::remove (nameInTree.begin(), nameInTree.end(), ':'), nameInTree.end());
+    std::cout<<"VectorDoubleNames_: tag:"<<tag<<" nameInTree: "<<nameInTree<<" originial full name: "<<tempFull<<std::endl;
     tree_->Branch((TString)nameInTree, "std::vector<double>", &(VectorDoubleVector_.at(i)), 32000, 0);
   }
   for(unsigned int i=0; i< VectorBoolNames_.size();i++)
   {
     std::vector<unsigned int> vector;
     VectorBoolVector_.push_back(vector);
+	}
+	for(unsigned int i=0; i< VectorBoolNames_.size();i++)
+	{
     std::string tempFull = VectorBoolNames_[i];
     std::string nameInTree = VectorBoolNames_[i];
     std::string tag = VectorBoolNames_[i];
@@ -556,6 +566,9 @@ TreeMaker::beginJob()
   {
     std::vector<std::string> vector;
     VectorStringVector_.push_back(vector);
+	}
+	for(unsigned int i=0; i< VectorStringNames_.size();i++)
+	{
     std::string tempFull = VectorStringNames_[i];
     std::string nameInTree = VectorStringNames_[i];
     std::string tag = VectorStringNames_[i];
@@ -573,6 +586,9 @@ TreeMaker::beginJob()
   {
     std::vector<TLorentzVector> vector;
     VectorTLorentzVector_.push_back(vector);
+	}
+	for(unsigned int i=0; i< VectorTLorentzVectorNames_.size();i++)
+		{
     std::string tempFull = VectorTLorentzVectorNames_[i];
     std::string nameInTree = VectorTLorentzVectorNames_[i];
     std::string tag = VectorTLorentzVectorNames_[i];

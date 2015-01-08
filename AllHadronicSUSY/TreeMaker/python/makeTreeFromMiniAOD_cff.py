@@ -258,54 +258,57 @@ numProcessedEvt=1000):
     process.GenLeptons = genLeptonRecoCand.clone(
     PrunedGenParticleTag  = cms.InputTag("prunedGenParticles"),
     )
-    RecoCandVector = cms.vstring()
-    RecoCandVector.extend(['selectedIDIsoMuons','selectedIDIsoElectrons','IsolatedTracks']) # basic muons electrons and isoalted tracks
-    RecoCandVector.extend(['selectedIDMuons','selectedIDElectrons']) # mu and e no isolation cuts
-    RecoCandVector.extend(['GenLeptons:Boson(GenBoson)|GenLeptons:BosonPDGId(I_GenBosonPDGId)','GenLeptons:Muon(GenMu)|GenLeptons:MuonTauDecay(I_GenMuFromTau)' ,'GenLeptons:Electron(GenElec)|GenLeptons:ElectronTauDecay(I_GenElecFromTau)','GenLeptons:Tau(GenTau)|GenLeptons:TauHadronic(I_GenTauHad)'] ) # gen information on leptons
-    RecoCandVector.extend(['JetsProperties(Jets)|JetsProperties:bDiscriminator(F_bDiscriminator)|JetsProperties:chargedEmEnergyFraction(F_chargedEmEnergyFraction)|JetsProperties:chargedHadronEnergyFraction(F_chargedHadronEnergyFraction)|JetsProperties:chargedHadronMultiplicity(I_chargedHadronMultiplicity)|JetsProperties:electronMultiplicity(I_electronMultiplicity)|JetsProperties:jetArea(F_jetArea)|JetsProperties:muonEnergyFraction(F_muonEnergyFraction)|JetsProperties:muonMultiplicity(I_muonMultiplicity)|JetsProperties:neutralEmEnergyFraction(F_neutralEmEnergyFraction)|JetsProperties:neutralHadronMultiplicity(I_neutralHadronMultiplicity)|JetsProperties:photonEnergyFraction(F_photonEnergyFraction)|JetsProperties:photonMultiplicity(I_photonMultiplicity)'] ) # jet information on various variables
+    RecoCandVector = cms.vstring() 
+    # remove the RecoCandVector extensions from the treeMaker when not interested in Lost Lepton propoerties  (when removing the LostLepton sequence this will not be valid! needs to be removed)
+ #   RecoCandVector.extend(['selectedIDIsoMuons','selectedIDIsoElectrons','IsolatedTracks']) # basic muons electrons and isoalted tracks
+ #   RecoCandVector.extend(['selectedIDMuons','selectedIDElectrons']) # mu and e no isolation cuts
+  #  RecoCandVector.extend(['GenLeptons:Boson(GenBoson)|GenLeptons:BosonPDGId(I_GenBosonPDGId)','GenLeptons:Muon(GenMu)|GenLeptons:MuonTauDecay(I_GenMuFromTau)' ,'GenLeptons:Electron(GenElec)|GenLeptons:ElectronTauDecay(I_GenElecFromTau)','GenLeptons:Tau(GenTau)|GenLeptons:TauHadronic(I_GenTauHad)'] ) # gen information on leptons
+ #   RecoCandVector.extend(['JetsProperties(Jets)|JetsProperties:bDiscriminator(F_bDiscriminator)|JetsProperties:chargedEmEnergyFraction(F_chargedEmEnergyFraction)|JetsProperties:chargedHadronEnergyFraction(F_chargedHadronEnergyFraction)|JetsProperties:chargedHadronMultiplicity(I_chargedHadronMultiplicity)|JetsProperties:electronMultiplicity(I_electronMultiplicity)|JetsProperties:jetArea(F_jetArea)|JetsProperties:muonEnergyFraction(F_muonEnergyFraction)|JetsProperties:muonMultiplicity(I_muonMultiplicity)|JetsProperties:neutralEmEnergyFraction(F_neutralEmEnergyFraction)|JetsProperties:neutralHadronMultiplicity(I_neutralHadronMultiplicity)|JetsProperties:photonEnergyFraction(F_photonEnergyFraction)|JetsProperties:photonMultiplicity(I_photonMultiplicity)'] ) # jet information on various variables
 
     
     from AllHadronicSUSY.TreeMaker.treeMaker import TreeMaker
     process.TreeMaker2 = TreeMaker.clone(
     	TreeName          = cms.string("PreSelection"),
-    	VarsRecoCand = RecoCandVector,
+    	VarsRecoCand = RecoCandVector, 
     	#VarsRecoCand = cms.vstring('selectedIDIsoMuons','selectedIDIsoElectrons','IsolatedTracks','HTJets'),
     	VarsDouble  	  = cms.vstring('WeightProducer:weight(Weight)','MHT','MET:Pt(METPt)','MET:Phi(METPhi)','HT','DeltaPhi:DeltaPhi1(DeltaPhi1)','DeltaPhi:DeltaPhi2(DeltaPhi2)','DeltaPhi:DeltaPhi3(DeltaPhi3)'),
     	VarsInt = cms.vstring('NJets','BTags','Leptons','NVtx',),
     #	VarsDoubleNamesInTree = cms.vstring('WeightProducer'),
     debug = debug,
     	)
+    #define sequences
+    process.Baseline = cms.Sequence(
+      process.selectedIDIsoMuons *
+      process.selectedIDIsoElectrons *
+      process.WeightProducer *
+      process.IsolatedTracks *
+      process.HTJets *
+      process.HT *
+      process.NJets *
+      process.BTags *
+      process.Leptons *
+      process.MET *
+      process.MHTJets *
+      process.MHT *
+      process.DeltaPhi *
+      process.NVtx 
+
+    )
+    process.LostLepton = cms.Sequence(
+      process.selectedIDMuons *
+      process.selectedIDElectrons *
+      process.MHTJetsProperties *
+      process.GenLeptons 
+    )
 
     ## --- Final paths ----------------------------------------------------
 
     process.dump = cms.EDAnalyzer("EventContentAnalyzer")
     process.WriteTree = cms.Path(
-    	process.selectedIDIsoMuons *
-    	process.selectedIDMuons *
-    	process.selectedIDIsoElectrons *
-    	process.selectedIDElectrons *
-    	process.WeightProducer *
-    	process.IsolatedTracks *
- #   	process.IsolatedTracksPT10 *
- #   	process.IsolatedTracksPT10IsoCut08 *
- #   	process.IsolatedTracksPT10IsoCut12 *
-  #  	process.slimmedJetsPFCombinedSecondaryVertexBJetTags *
-      process.HTJets *
-      process.HT *
-      process.NJets *
-      process.BTags *
-      process.MHTJets *
-      process.MHTJetsProperties *
-      process.JetsProperties *
-      process.MHT *
-      process.Leptons *
-      process.MET *
-      process.DeltaPhi *
-      process.NVtx *
-      process.GenLeptons *
+      process.Baseline *
+  #    process.LostLepton *
+    
     	#process.dump *
- #   	process.CountIsoTracks *
- #   	process.PrintDecay *
     	process.TreeMaker2
 
         )
