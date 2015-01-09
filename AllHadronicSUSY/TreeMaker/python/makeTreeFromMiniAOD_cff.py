@@ -160,7 +160,7 @@ numProcessedEvt=1000):
       pfCandidatesTag = cms.InputTag("packedPFCandidates"),
       dR_ConeSize         = cms.double(0.3),
       dz_CutValue         = cms.double(0.05),
-      minPt_PFCandidate   = cms.double(12.0),
+      minPt_PFCandidate   = cms.double(15.0),
       isoCut              = cms.double(0.1),
       )
     #study
