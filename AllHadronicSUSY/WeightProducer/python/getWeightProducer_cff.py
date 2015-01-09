@@ -396,6 +396,31 @@ def getWeightProducer(fileName):
 			print "WJetsToLNu_HT-600toInf_Tune4C_13TeV Phys14DR: '"+fileName+"'"
 			applyWeight = True
 			weightProducer.weight = cms.double(-1.)
+    if "ZJetsToNuNu_HT-200to400_Tune4C_13TeV" in fileName and "PU20bx25_PHYS14_25_V1-v1" in fileName:
+			mcVersion = "Phys14DR"
+			weightProducer.Method     = cms.string("Constant")
+			weightProducer.XS         = cms.double(100.8)
+			weightProducer.NumberEvts = cms.double(4546470)  
+			print "ZJetsToNuNu_HT-200to400_Tune4C_13TeV '"+fileName+"'"
+			applyWeight = True
+			weightProducer.weight = cms.double(-1.)
+    if "ZJetsToNuNu_HT-400to600_Tune4C_13TeV" in fileName and "PU20bx25_PHYS14_25_V1-v1" in fileName:
+			mcVersion = "Phys14DR"
+			weightProducer.Method     = cms.string("Constant")
+			weightProducer.XS         = cms.double(11.99)
+			weightProducer.NumberEvts = cms.double(100)  
+			print "ZJetsToNuNu_HT-400to600_Tune4C_13TeV: UPDATE NUMBER OF EVENTS NOT YET AVAILABLE '"+fileName+"'"
+			applyWeight = True
+			weightProducer.weight = cms.double(-1.)
+    if "ZJetsToNuNu_HT-600toInf_Tune4C_13TeV" in fileName and "PU20bx25_PHYS14_25_V1-v1" in fileName:
+			mcVersion = "Phys14DR"
+			weightProducer.Method     = cms.string("Constant")
+			weightProducer.XS         = cms.double(4.113)
+			weightProducer.NumberEvts = cms.double(4463806)  
+			print "ZJetsToNuNu_HT-600toInf_Tune4C_13TeV '"+fileName+"'"
+			applyWeight = True
+			weightProducer.weight = cms.double(-1.)
+				
         
     ## --- PU Reweighting and Lumi ------------------------------------------------
          

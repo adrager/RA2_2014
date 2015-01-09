@@ -43,9 +43,11 @@ private:
   const unsigned int nMaxCandidates_;
   void setBranchVariablesToDefault();
   std::pair <std::string,std::string> SeparateString(std::string InputStr, std::string Separater);
+  TString FinalizeName(std::string nameInTree);
   TString treeName_;
   TTree* tree_;	
   bool debug_;
+  std::vector<std::string> nameCache_;
   // generell event information
   UInt_t runNum_;      
   UInt_t lumiBlockNum_;
