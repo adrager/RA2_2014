@@ -215,7 +215,7 @@ numProcessedEvt=1000):
     process.BTags = btagint.clone(
     JetTag  = cms.InputTag('HTJets'),
     BTagInputTag	        = cms.string('combinedInclusiveSecondaryVertexV2BJetTags'),
-    BTagCutValue					= cms.double(0.679)
+    BTagCutValue					= cms.double(0.814)
     )
     from AllHadronicSUSY.Utils.subJetSelection_cfi import SubJetSelection
     process.MHTJets = SubJetSelection.clone(
