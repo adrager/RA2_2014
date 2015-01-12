@@ -65,6 +65,7 @@ TreeMaker::TreeMaker(const edm::ParameterSet& iConfig)
   VectorBoolVector_.clear();
   VectorStringVector_.clear();
   VectorTLorentzVector_.clear();
+  nameCache_.clear();
   
 }
 
@@ -306,9 +307,13 @@ TreeMaker::beginJob()
     }
     std::cout<<"VarsIntNames: tag:"<<tag<<" nameInTree: "<<nameInTree<<" originial full name: "<<tempFull<<std::endl;
     VarsIntTags_.push_back(edm::InputTag(tag));
-    nameInTree.erase (std::remove (nameInTree.begin(), nameInTree.end(), ':'), nameInTree.end());
+    if(nameInTree.find(':')<nameInTree.size())
+    {
+      nameInTree = SeparateString(nameInTree,":").second;
+    }
+    nameInTree = FinalizeName(nameInTree);
+    std::cout<<"VarsIntNames: tag:"<<tag<<" nameInTree: "<<nameInTree<<" originial full name: "<<tempFull<<std::endl;
     tree_->Branch((TString)nameInTree,&(VarsInt_.at(i)),(TString)nameInTree+"/I");
-    
   }
   // double variables
   VarsDouble_ = std::vector<Float_t>(VarsDoubleNames_.size(),1.);
@@ -324,7 +329,11 @@ TreeMaker::beginJob()
     }
     std::cout<<"VarsDoubleNames_: tag:"<<tag<<" nameInTree: "<<nameInTree<<" originial full name: "<<tempFull<<std::endl;
     VarsDoubleTags_.push_back(edm::InputTag(tag));
-    nameInTree.erase (std::remove (nameInTree.begin(), nameInTree.end(), ':'), nameInTree.end());
+    if(nameInTree.find(':')<nameInTree.size())
+    {
+      nameInTree = SeparateString(nameInTree,":").second;
+    }
+    nameInTree = FinalizeName(nameInTree);
     tree_->Branch((TString)nameInTree,&(VarsDouble_.at(i)),(TString)nameInTree+"/F");
     
   }
@@ -342,7 +351,11 @@ TreeMaker::beginJob()
     }
     std::cout<<"VarsBoolNames_: tag:"<<tag<<" nameInTree: "<<nameInTree<<" originial full name: "<<tempFull<<std::endl;
     VarsBoolTags_.push_back(edm::InputTag(tag));
-    nameInTree.erase (std::remove (nameInTree.begin(), nameInTree.end(), ':'), nameInTree.end());
+    if(nameInTree.find(':')<nameInTree.size())
+    {
+      nameInTree = SeparateString(nameInTree,":").second;
+    }
+    nameInTree = FinalizeName(nameInTree);
     tree_->Branch((TString)nameInTree,&(VarsBool_.at(i)),(TString)nameInTree+"/b");
     
   }
@@ -360,7 +373,11 @@ TreeMaker::beginJob()
     }
     std::cout<<"VarsTLorentzVectorNames_: tag:"<<tag<<" nameInTree: "<<nameInTree<<" originial full name: "<<tempFull<<std::endl;
     VarsTLorentzVectorTags_.push_back(edm::InputTag(tag));
-    nameInTree.erase (std::remove (nameInTree.begin(), nameInTree.end(), ':'), nameInTree.end());
+    if(nameInTree.find(':')<nameInTree.size())
+    {
+      nameInTree = SeparateString(nameInTree,":").second;
+    }
+    nameInTree = FinalizeName(nameInTree);
     tree_->Branch((TString)nameInTree,(TString)nameInTree,&(VarsTLorentzVector_.at(i)));
     
   }
@@ -378,7 +395,11 @@ TreeMaker::beginJob()
     }
     std::cout<<"VarsStringNames_: tag:"<<tag<<" nameInTree: "<<nameInTree<<" originial full name: "<<tempFull<<std::endl;
     VarsStringTags_.push_back(edm::InputTag(tag));
-    nameInTree.erase (std::remove (nameInTree.begin(), nameInTree.end(), ':'), nameInTree.end());
+    if(nameInTree.find(':')<nameInTree.size())
+    {
+      nameInTree = SeparateString(nameInTree,":").second;
+    }
+    nameInTree = FinalizeName(nameInTree);
     tree_->Branch((TString)nameInTree,(TString)nameInTree,&(VarsString_.at(i)));
     
   }
@@ -409,7 +430,11 @@ TreeMaker::beginJob()
     varsRecoCandTags_.push_back(edm::InputTag(temp));
     std::cout<<"RecoCand stored name in tree: "<<nameInTree<<std::endl;
     temp=nameInTree;
-    temp.erase (std::remove (temp.begin(), temp.end(), ':'), temp.end());
+    if(temp.find(':')<temp.size())
+    {
+      temp = SeparateString(temp,":").second;
+    }
+    temp = FinalizeName(temp);
     tree_->Branch((temp+"Num").c_str(),&(RecoCandN_.at(i)),(temp+"Num/s").c_str());
     tree_->Branch((temp+"Pt").c_str(), RecoCandPt_.at(i), (temp+"Pt["+temp+"Num]/F").c_str());
     tree_->Branch((temp+"Eta").c_str(),RecoCandEta_.at(i),(temp+"Eta["+temp+"Num]/F").c_str());
@@ -466,7 +491,11 @@ TreeMaker::beginJob()
       }
       else if(typ==-1)std::cout<<"Warning no typ selected for additonal input object: "<<temp2<<" of main varialbe: "<<nameInTree<<"Please use: tag(x_Name) with x=b,I,F (bool, int float) and optional Name for naming in the tree"<<std::endl;
       // std::cout<<"| TagName: "<<temp2<<std::endl;
-      nameInTree.erase (std::remove (nameInTree.begin(), nameInTree.end(), ':'), nameInTree.end());
+      if(nameInTree.find(':')<nameInTree.size())
+      {
+	nameInTree = SeparateString(nameInTree,":").second;
+      }
+      nameInTree = FinalizeName(nameInTree);
       std::cout<<"Sub Typ: Tag: "<<tag<<", typ: "<<typ<< ", nameIn Tree: "<<nameInTree<<std::endl;
       if(typ==0)
       {
@@ -518,7 +547,11 @@ TreeMaker::beginJob()
     }
     std::cout<<"VectorIntNames_: tag:"<<tag<<" nameInTree: "<<nameInTree<<" originial full name: "<<tempFull<<std::endl;
     VectorIntTags_.push_back(edm::InputTag(tag));
-    nameInTree.erase (std::remove (nameInTree.begin(), nameInTree.end(), ':'), nameInTree.end());
+    if(nameInTree.find(':')<nameInTree.size())
+    {
+      nameInTree = SeparateString(nameInTree,":").second;
+    }
+    nameInTree = FinalizeName(nameInTree);
     tree_->Branch((TString)nameInTree, "std::vector<int>", &(VectorIntVector_.at(i)), 32000, 0);
   }
   for(unsigned int i=0; i< VectorDoubleNames_.size();i++)
@@ -538,7 +571,11 @@ TreeMaker::beginJob()
     }
     
     VectorDoubleTags_.push_back(edm::InputTag(tag));
-    nameInTree.erase (std::remove (nameInTree.begin(), nameInTree.end(), ':'), nameInTree.end());
+    if(nameInTree.find(':')<nameInTree.size())
+    {
+      nameInTree = SeparateString(nameInTree,":").second;
+    }
+    nameInTree = FinalizeName(nameInTree);
     std::cout<<"VectorDoubleNames_: tag:"<<tag<<" nameInTree: "<<nameInTree<<" originial full name: "<<tempFull<<std::endl;
     tree_->Branch((TString)nameInTree, "std::vector<double>", &(VectorDoubleVector_.at(i)), 32000, 0);
   }
@@ -559,7 +596,11 @@ TreeMaker::beginJob()
     }
     std::cout<<"VectorBoolNames_: tag:"<<tag<<" nameInTree: "<<nameInTree<<" originial full name: "<<tempFull<<std::endl;
     VectorBoolTags_.push_back(edm::InputTag(tag));
-    nameInTree.erase (std::remove (nameInTree.begin(), nameInTree.end(), ':'), nameInTree.end());
+    if(nameInTree.find(':')<nameInTree.size())
+    {
+      nameInTree = SeparateString(nameInTree,":").second;
+    }
+    nameInTree = FinalizeName(nameInTree);
     tree_->Branch((TString)nameInTree, "std::vector<unsigned int>", &(VectorBoolVector_.at(i)), 32000, 0);
   }
   for(unsigned int i=0; i< VectorStringNames_.size();i++)
@@ -579,7 +620,11 @@ TreeMaker::beginJob()
     }
     std::cout<<"VectorStringNames_: tag:"<<tag<<" nameInTree: "<<nameInTree<<" originial full name: "<<tempFull<<std::endl;
     VectorStringTags_.push_back(edm::InputTag(tag));
-    nameInTree.erase (std::remove (nameInTree.begin(), nameInTree.end(), ':'), nameInTree.end());
+    if(nameInTree.find(':')<nameInTree.size())
+    {
+      nameInTree = SeparateString(nameInTree,":").second;
+    }
+    nameInTree = FinalizeName(nameInTree);
     tree_->Branch((TString)nameInTree, "std::vector<std::string>", &(VectorStringVector_.at(i)), 32000, 0);
   }
   for(unsigned int i=0; i< VectorTLorentzVectorNames_.size();i++)
@@ -599,7 +644,11 @@ TreeMaker::beginJob()
     }
     std::cout<<"VectorTLorentzVectorNames_: tag:"<<tag<<" nameInTree: "<<nameInTree<<" originial full name: "<<tempFull<<std::endl;
     VectorTLorentzVectorTags_.push_back(edm::InputTag(tag));
-    nameInTree.erase (std::remove (nameInTree.begin(), nameInTree.end(), ':'), nameInTree.end());
+    if(nameInTree.find(':')<nameInTree.size())
+    {
+      nameInTree = SeparateString(nameInTree,":").second;
+    }
+    nameInTree = FinalizeName(nameInTree);
     tree_->Branch((TString)nameInTree, "std::vector<TLorentzVector>", &(VectorTLorentzVector_.at(i)), 32000, 0);
   }
 }
@@ -715,3 +764,31 @@ std::pair <std::string,std::string> TreeMaker::SeparateString(std::string InputS
 }
 //define this as a plug-in
 DEFINE_FWK_MODULE(TreeMaker);
+
+TString TreeMaker::FinalizeName(std::string nameInTree)
+{
+  bool checkName=true;
+  unsigned int iteration=0;
+  TString TTemp_=nameInTree;
+  while (checkName)
+  {
+    checkName=false;
+    iteration++;
+    for (unsigned int j=0; j<nameCache_.size() ;j++)
+    {
+      if(nameCache_[j]==TTemp_)
+      {
+	TTemp_=nameInTree;
+	std::cout<<"Warning name in Tree already defined alternating name...TTemp: "<<TTemp_<<std::endl;
+	int n_;
+	char buffer_[300];
+	n_ = sprintf(buffer_,"_%d",iteration);
+	n_++;
+	TTemp_+=buffer_;
+	checkName=true;
+      }
+    }
+  }
+  nameCache_.push_back((std::string)TTemp_);
+  return TTemp_;
+}
