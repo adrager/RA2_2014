@@ -200,7 +200,7 @@ numProcessedEvt=1000):
     from AllHadronicSUSY.Utils.subJetSelection_cfi import SubJetSelection
     process.HTJets = SubJetSelection.clone(
     JetTag  = cms.InputTag('slimmedJets'),
-    MinPt								  = cms.double(50),
+    MinPt								  = cms.double(30),
     MaxEta								  = cms.double(2.5),
     )
     from AllHadronicSUSY.Utils.htdouble_cfi import htdouble
