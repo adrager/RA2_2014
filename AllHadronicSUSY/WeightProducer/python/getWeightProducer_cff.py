@@ -406,7 +406,7 @@ def getWeightProducer(fileName):
     if "QCD_HT-500To1000_13TeV-madgraph" in fileName and "PU20bx25_PHYS14_25_V1-v1" in fileName:
 			mcVersion = "Phys14DR"
 			weightProducer.Method     = cms.string("Constant")
-			weightProducer.XS         = cms.double(2.674e+10)
+			weightProducer.XS         = cms.double(2.674e+4)
 			weightProducer.NumberEvts = cms.double(849033)  
 			print "TToLeptons_s-channel-CSA14_Tune4C_13TeV : '"+fileName+"'"
 			applyWeight = True
