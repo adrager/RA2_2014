@@ -23,7 +23,7 @@ def getWeightProducer(fileName):
 
     # Set default values to produce an event weight of 1
     weightProducer.weight = cms.double(1.0)
-    weightProducer.Method = cms.string("")
+    weightProducer.Method = cms.string("Constant")
     weightProducer.LumiScale = cms.double(1.0)
     weightProducer.FileNamePUDataDistribution = cms.string("NONE")
     weightProducer.PU = cms.int32(0)
