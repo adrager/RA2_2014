@@ -120,14 +120,15 @@ LeptonInt::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 	edm::Handle<reco::VertexCollection> vtx_h;
         iEvent.getByLabel(PrimVtxTag_, vtx_h);
 
-        edm::Handle<edm::View<pat::Electron> > eleHandle;
+        edm::Handle<edm::View<reco::Candidate> > eleHandle;
         iEvent.getByLabel(eleTag_, eleHandle);
 	 if(eleHandle.isValid()){
 
            for(unsigned int e=0; e<eleHandle->size(); ++e){
          
            if(fabs(eleHandle->at(e).eta())>2.5 ||eleHandle->at(e).pt()<10)continue;
-           	if(eleHandle->at(e).electronID("cutBasedElectronID-CSA14-PU20bx25-V0-standalone-veto")>0.5)++Electrons;
+           //	if(eleHandle->at(e).electronID("cutBasedElectronID-CSA14-PU20bx25-V0-standalone-veto")>0.5)
+           	++Electrons;
            }
          }
 
