@@ -80,6 +80,7 @@ DeltaPhiDouble::DeltaPhiDouble(const edm::ParameterSet& iConfig)
 	produces<double>("DeltaPhi1");
 	produces<double>("DeltaPhi2");
 	produces<double>("DeltaPhi3");
+	produces<double>("minDeltaPhi");
 	/* Examples
 	 *   produces<ExampleData2>();
 	 * 
@@ -127,6 +128,7 @@ DeltaPhiDouble::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 	else std::cout<<"DeltaPhiDouble::Invlide MHT Jet Tag: "<<MHTJetTag_.label()<<std::endl;
 	edm::Handle< edm::View<reco::Candidate> > DeltaPhiJets;
 	iEvent.getByLabel(DeltaPhiJetTag_,DeltaPhiJets);
+	float minDeltaPhi=99;
 	if( DeltaPhiJets.isValid() ) {
 		int count=0;
 		for(unsigned int i=0; i<DeltaPhiJets->size();i++)
@@ -134,6 +136,7 @@ DeltaPhiDouble::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 			if(count==0) 	deltaphi1 = std::abs(reco::deltaPhi(DeltaPhiJets->at(i).phi(),mhtLorentz.phi()));
 			if(count==1) 	deltaphi2 = std::abs(reco::deltaPhi(DeltaPhiJets->at(i).phi(),mhtLorentz.phi()));
 			if(count==2) 	deltaphi3 = std::abs(reco::deltaPhi(DeltaPhiJets->at(i).phi(),mhtLorentz.phi()));
+			if(minDeltaPhi>std::abs(reco::deltaPhi(DeltaPhiJets->at(i).phi(),mhtLorentz.phi())))minDeltaPhi=std::abs(reco::deltaPhi(DeltaPhiJets->at(i).phi(),mhtLorentz.phi()));;
 			count++;
 			if(count==3) break;
 		}
@@ -146,7 +149,8 @@ DeltaPhiDouble::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 	iEvent.put(htp2,"DeltaPhi2");
 	std::auto_ptr<double> htp3(new double(deltaphi3));
 	iEvent.put(htp3,"DeltaPhi3");
-	
+	std::auto_ptr<double> htp4(new double(minDeltaPhi));
+        iEvent.put(htp4,"minDeltaPhi");
 }
 
 // ------------ method called once each job just before starting event loop  ------------

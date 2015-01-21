@@ -57,6 +57,7 @@ class DeltaPhiProducer : public edm::EDProducer {
       virtual void endLuminosityBlock(edm::LuminosityBlock&, edm::EventSetup const&);
       edm::InputTag mhtTag_, mhtJetsTag_;
    double deltaPhi1, deltaPhi2, deltaPhi3;
+   double minDeltaPhi;
    double minJetPt_, maxJetEta_;
 
 
@@ -84,9 +85,11 @@ DeltaPhiProducer::DeltaPhiProducer(const edm::ParameterSet& iConfig)
   const std::string string1("DeltaPhi1");
   const std::string string2("DeltaPhi2");
   const std::string string3("DeltaPhi3");
+  const std::string string4("minDeltaPhi");
   produces<double> (string1).setBranchAlias(string1);
   produces<double> (string2).setBranchAlias(string2);
   produces<double> (string3).setBranchAlias(string3);
+  produces<double> (string3).setBranchAlias(string4);
    //register your products
 /* Examples
    produces<ExampleData2>();
@@ -123,6 +126,7 @@ DeltaPhiProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   deltaPhi1=-9999;
   deltaPhi2=-9999;
   deltaPhi3=-9999;
+  minDeltaPhi=9999;
   edm::Handle< edm::View<reco::Candidate> > mht;
   iEvent.getByLabel(mhtTag_,mht);
   edm::Handle< edm::View<reco::Candidate> > mhtJets;
@@ -136,6 +140,7 @@ DeltaPhiProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
       if (iJet==0) { deltaPhi1=deltaPhi; iJet++; continue;}
       if (iJet==1) { deltaPhi2=deltaPhi; iJet++; continue;}
       if (iJet==2) { deltaPhi3=deltaPhi; iJet++; continue;}
+      if(minDeltaPhi>deltaPhi)minDeltaPhi=deltaPhi;
       if (iJet==3) break;
     }
   }
@@ -144,12 +149,15 @@ DeltaPhiProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   const std::string string1("DeltaPhi1");
   const std::string string2("DeltaPhi2");
   const std::string string3("DeltaPhi3");
+  const std::string string4("minDeltaPhi");
   std::auto_ptr<double> htp1(new double(deltaPhi1));
   std::auto_ptr<double> htp2(new double(deltaPhi2));
   std::auto_ptr<double> htp3(new double(deltaPhi3));
+  std::auto_ptr<double> htp4(new double(minDeltaPhi));
   iEvent.put(htp1,string1 );
   iEvent.put(htp2,string2 );
   iEvent.put(htp3,string3 );
+  iEvent.put(htp4, string4);
 }
 
 // ------------ method called once each job just before starting event loop  ------------

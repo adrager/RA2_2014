@@ -162,6 +162,7 @@ numProcessedEvt=1000):
       dz_CutValue         = cms.double(0.05),
       minPt_PFCandidate   = cms.double(15.0),
       isoCut              = cms.double(0.1),
+      mTCut=cms.double(100.),
       )
     #study
     process.IsolatedTracksPT10 = trackIsolationFilter.clone(
@@ -172,6 +173,7 @@ numProcessedEvt=1000):
       dz_CutValue         = cms.double(0.05),
       minPt_PFCandidate   = cms.double(10.0),
       isoCut              = cms.double(0.1),
+      mTCut=cms.double(100.),
       )
     process.IsolatedTracksPT10IsoCut08 = trackIsolationFilter.clone(
       doTrkIsoVeto= False,
@@ -181,6 +183,7 @@ numProcessedEvt=1000):
       dz_CutValue         = cms.double(0.05),
       minPt_PFCandidate   = cms.double(10.0),
       isoCut              = cms.double(0.08),
+      mTCut=cms.double(100.),
       )
     process.IsolatedTracksPT10IsoCut12 = trackIsolationFilter.clone(
       doTrkIsoVeto= False,
@@ -190,6 +193,7 @@ numProcessedEvt=1000):
       dz_CutValue         = cms.double(0.05),
       minPt_PFCandidate   = cms.double(10.0),
       isoCut              = cms.double(0.15),
+      mTCut=cms.double(100.),
       )
     process.CountIsoTracks = trackIsolationCounter.clone(
       src = cms.InputTag("IsolatedTracks"),
@@ -226,12 +230,14 @@ numProcessedEvt=1000):
     from AllHadronicSUSY.Utils.jetproperties_cfi import jetproperties
     process.MHTJetsProperties = jetproperties.clone(
     JetTag  = cms.InputTag('MHTJets'),
-    BTagInputTag	        = cms.string('combinedInclusiveSecondaryVertexV2BJetTags'),
+    BTagInputTag= cms.string('combinedInclusiveSecondaryVertexV2BJetTags'),
+    METTag  = cms.InputTag("slimmedMETs"),
     )
     from AllHadronicSUSY.Utils.jetproperties_cfi import jetproperties
     process.JetsProperties = jetproperties.clone(
     JetTag  = cms.InputTag('slimmedJets'),
     BTagInputTag	        = cms.string('combinedInclusiveSecondaryVertexV2BJetTags'),
+    METTag  = cms.InputTag("slimmedMETs"),
     )
     from AllHadronicSUSY.Utils.mhtdouble_cfi import mhtdouble
     process.MHT = mhtdouble.clone(
@@ -245,10 +251,14 @@ numProcessedEvt=1000):
     from AllHadronicSUSY.Utils.metdouble_cfi import metdouble
     process.MET = metdouble.clone(
     METTag  = cms.InputTag("slimmedMETs"),
+    JetTag  = cms.InputTag('slimmedJets'),
     )
     from AllHadronicSUSY.Utils.leptonint_cfi import leptonint
     process.Leptons = leptonint.clone(
     LeptonTag = cms.VInputTag(cms.InputTag('selectedIDIsoMuons'),cms.InputTag('selectedIDIsoElectrons')),
+    srcEle = cms.InputTag("selectedIDIsoElectrons"),
+    srcMuon = cms.InputTag("slimmedMuons"),
+    srcPV=cms.InputTag("offlineSlimmedPrimaryVertices"), 
     )
     from AllHadronicSUSY.Utils.primaryverticies_cfi import primaryverticies
     process.NVtx = primaryverticies.clone(
@@ -271,8 +281,8 @@ numProcessedEvt=1000):
     	TreeName          = cms.string("PreSelection"),
     	VarsRecoCand = RecoCandVector, 
     	#VarsRecoCand = cms.vstring('selectedIDIsoMuons','selectedIDIsoElectrons','IsolatedTracks','HTJets'),
-    	VarsDouble  	  = cms.vstring('WeightProducer:weight(Weight)','MHT','MET:Pt(METPt)','MET:Phi(METPhi)','HT','DeltaPhi:DeltaPhi1','DeltaPhi:DeltaPhi2','DeltaPhi:DeltaPhi3'),
-    	VarsInt = cms.vstring('NJets','BTags','Leptons','NVtx',),
+    	VarsDouble  	  = cms.vstring('WeightProducer:weight(Weight)','MHT','MET:Pt(METPt)','MET:Phi(METPhi)','HT','DeltaPhi:DeltaPhi1','DeltaPhi:DeltaPhi2','DeltaPhi:DeltaPhi3', 'DeltaPhi:minDeltaPhi','MET:minDeltaPhiN', 'MET:DeltaPhiN1', 'MET:DeltaPhiN2','MET:DeltaPhiN3',),
+    	VarsInt = cms.vstring('NJets','BTags','Leptons:Leptons', 'Leptons:Electrons', 'Leptons:Muons','NVtx','IsolatedTracks:isoTracks'),
     #	VarsDoubleNamesInTree = cms.vstring('WeightProducer'),
     debug = debug,
     	)

@@ -84,6 +84,7 @@ TrackIsolationFilter::TrackIsolationFilter(const edm::ParameterSet& iConfig) {
   produces<vector<float> >("pfcandsdzpv"  ).setBranchAlias("pfcands_dzpv");
   produces<vector<float> >("pfcandspt"    ).setBranchAlias("pfcands_pt");
   produces<vector<int>   >("pfcandschg"   ).setBranchAlias("pfcands_chg");
+  produces<int>("isoTracks").setBranchAlias("isoTracks");
 
 }
 
@@ -227,7 +228,7 @@ bool TrackIsolationFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSe
 	// store pt and charge of PFCandidate
 	//-------------------------------------------------------------------------------------
 	double dphiMET=fabs((*pfCandidates)[i].phi()-metLorentz.phi());
-        double mT=sqrt(2 * -metLorentz.pt() * (*pfCandidates)[i].pt() * (1 - cos(dphiMET)));
+        double mT=sqrt(2 *metLorentz.pt() * (*pfCandidates)[i].pt() * (1 - cos(dphiMET)));
         if(mT>mTCut_)continue;
 	pfcands_pt->push_back((*pfCandidates)[i].pt());
 	pfcands_chg->push_back((*pfCandidates)[i].charge());
@@ -280,14 +281,17 @@ bool TrackIsolationFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSe
 
   bool result = (doTrkIsoVeto_ ? (prod->size() == 0) : true);
 
+  int isoTracks=prodminiAOD->size();
+  std::auto_ptr<int> htp(new int(isoTracks));
+  iEvent.put(htp,"isoTracks" );
+
   // put trkiso and dz values back into event
   iEvent.put(pfcands_trkiso,"pfcandstrkiso");
   iEvent.put(pfcands_dzpv  ,"pfcandsdzpv"  );
   iEvent.put(pfcands_pt    ,"pfcandspt"    );
   iEvent.put(pfcands_chg   ,"pfcandschg"   );
 
-  iEvent.put(prodminiAOD);
-
+  iEvent.put(prodminiAOD); 
   return result;
 }
 

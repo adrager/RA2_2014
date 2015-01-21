@@ -20,7 +20,7 @@
 
 // system include files
 #include <memory>
-
+#include "GoodJets.cc"
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/EDProducer.h"
@@ -31,7 +31,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DataFormats/JetReco/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/MET.h"
-
+#include "DataFormats/PatCandidates/interface/Jet.h"
 //
 // class declaration
 //
@@ -109,12 +109,14 @@ MhtDouble::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   using namespace edm;
 	double mht_=0;
-  edm::Handle< edm::View<reco::Candidate> > Jets;
+  edm::Handle< edm::View<pat::Jet> > Jets;
 	iEvent.getByLabel(JetTag_,Jets);
 	reco::MET::LorentzVector mhtLorentz(0,0,0,0);
 	if( Jets.isValid() ) {
 		for(unsigned int i=0; i<Jets->size();i++)
 		{
+		GoodJets gj(Jets->at(i));
+		if(!gj.isGood())continue;
 		mhtLorentz -=Jets->at(i).p4();
 		}
   }

@@ -20,7 +20,8 @@
 
 // system include files
 #include <memory>
-
+#include "GoodJets.cc"
+#include "TMath.h"
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/EDProducer.h"
@@ -30,6 +31,7 @@
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
+#include "DataFormats/PatCandidates/interface/MET.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
 
 //
@@ -52,11 +54,9 @@ private:
 	virtual void endRun(edm::Run&, edm::EventSetup const&);
 	virtual void beginLuminosityBlock(edm::LuminosityBlock&, edm::EventSetup const&);
 	virtual void endLuminosityBlock(edm::LuminosityBlock&, edm::EventSetup const&);
-	edm::InputTag JetTag_;
+	virtual double DeltaT(unsigned int i, edm::Handle< edm::View<pat::Jet> > Jets);
+	edm::InputTag JetTag_, METTag_;
 	std::string   btagname_;
-
-	
-	
 	// ----------member data ---------------------------
 };
 
@@ -75,6 +75,7 @@ private:
 JetProperties::JetProperties(const edm::ParameterSet& iConfig)
 {
 	JetTag_ = iConfig.getParameter<edm::InputTag>("JetTag");
+	METTag_ = iConfig.getParameter<edm::InputTag>("METTag");
 	btagname_ = iConfig.getParameter<std::string>  ("BTagInputTag");
 	//register your products
 	/* Examples
@@ -88,6 +89,10 @@ JetProperties::JetProperties(const edm::ParameterSet& iConfig)
 	 */
 	//now do what ever other initialization is needed
 	//register your products
+        produces<double>("DeltaPhiN1");
+        produces<double>("DeltaPhiN2");
+        produces<double>("DeltaPhiN3");
+        produces<double>("minDeltaPhiN");
 	produces<std::vector<pat::Jet> >();
 	const std::string string0("jetArea");
 	produces<std::vector<double> > (string0).setBranchAlias(string0);
@@ -117,7 +122,8 @@ JetProperties::JetProperties(const edm::ParameterSet& iConfig)
 	produces<std::vector<int> > (string12).setBranchAlias(string12);
 	const std::string string13("bDiscriminator");
 	produces<std::vector<double> > (string13).setBranchAlias(string13);
-	
+
+		
 }
 
 
@@ -161,6 +167,12 @@ JetProperties::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 	using namespace pat;
 	edm::Handle< edm::View<pat::Jet> > Jets;
 	iEvent.getByLabel(JetTag_,Jets);
+	edm::Handle< edm::View<reco::MET> > MET; 
+	iEvent.getByLabel(METTag_,MET);
+    reco::MET::LorentzVector metLorentz(0,0,0,0);
+    if(MET.isValid() )metLorentz=MET->at(0).p4();	
+	    unsigned int goodcount=0;
+    double dpnhat[3];
 	if( Jets.isValid() ) {
 		for(unsigned int i=0; i<Jets->size();i++)
 		{
@@ -180,6 +192,15 @@ JetProperties::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 			muonEnergyFraction->push_back( Jets->at(i).muonEnergyFraction() );
 			muonMultiplicity->push_back( Jets->at(i).muonMultiplicity() );
 			bDiscriminator->push_back( Jets->at(i).bDiscriminator(btagname_) );
+			GoodJets gj(Jets->at(i));
+			if(!gj.isGood())continue;
+			if(goodcount<3 ){
+			float dphi=std::abs(reco::deltaPhi(Jets->at(i).phi(),metLorentz.phi()));
+                	float dT=DeltaT(i, Jets);
+                	if(dT/metLorentz.pt()>=1.0)dpnhat[goodcount]=dphi/(TMath::Pi()/2.0);
+                	else dpnhat[goodcount]=dphi/asin(dT/metLorentz.pt());
+			++goodcount;
+			}	
 		}
 	}
 	const std::string string00("");
@@ -213,7 +234,39 @@ JetProperties::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 	iEvent.put(muonMultiplicity,string12);
 	const std::string string13("bDiscriminator");
 	iEvent.put(bDiscriminator,string13);
-	
+
+	        std::auto_ptr<double> htp1(new double(dpnhat[0]));
+        iEvent.put(htp1,"DeltaPhiN1");
+        std::auto_ptr<double> htp2(new double(dpnhat[1]));
+        iEvent.put(htp2,"DeltaPhiN2");
+        std::auto_ptr<double> htp3(new double(dpnhat[2]));
+        iEvent.put(htp3,"DeltaPhiN3");
+        float mindpn=9999;
+        for(int i=0; i<3; ++i){
+        if(mindpn>fabs(dpnhat[i]))mindpn=fabs(dpnhat[i]);
+        }
+                std::auto_ptr<double> htp4(new double(mindpn));
+        iEvent.put(htp4,"minDeltaPhiN");	
+}
+
+double JetProperties::DeltaT(unsigned int i, edm::Handle< edm::View<pat::Jet> > Jets ){
+
+    double deltaT=0;
+    float jres=0.1;
+    double sum=0;
+    if( Jets.isValid() ) {
+        for(unsigned int j=0; j<Jets->size(); ++j){
+            if(j==i)continue;
+	     GoodJets gj(Jets->at(j));
+            if(!gj.isGood())continue;
+            if(Jets->at(j).pt()<30)continue;
+            sum=sum+(Jets->at(i).px()*Jets->at(j).py()-Jets->at(j).px()*Jets->at(i).py()) * (Jets->at(i).px()*Jets->at(j).py()-Jets->at(j).px()*Jets->at(i).py());
+        }
+        deltaT=jres*sqrt(sum)/Jets->at(i).pt();
+
+    }
+
+    return deltaT;
 }
 
 // ------------ method called once each job just before starting event loop  ------------

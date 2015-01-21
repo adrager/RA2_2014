@@ -30,8 +30,9 @@
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DataFormats/JetReco/interface/Jet.h"
+#include "DataFormats/PatCandidates/interface/Electron.h"
 #include "DataFormats/PatCandidates/interface/MET.h"
-
+#include "DataFormats/PatCandidates/interface/Muon.h"
 //
 // class declaration
 //
@@ -53,6 +54,7 @@ private:
 	virtual void beginLuminosityBlock(edm::LuminosityBlock&, edm::EventSetup const&);
 	virtual void endLuminosityBlock(edm::LuminosityBlock&, edm::EventSetup const&);
 	std::vector<edm::InputTag> leptonTag_;
+	edm::InputTag  eleTag_,muonTag_,PrimVtxTag_;
 	
 	
 	// ----------member data ---------------------------
@@ -73,9 +75,14 @@ private:
 LeptonInt::LeptonInt(const edm::ParameterSet& iConfig)
 {
 	//register your produc
-	leptonTag_ 				= 	iConfig.getParameter< std::vector<edm::InputTag> >("LeptonTag");
-	
-	produces<int>("");
+
+	leptonTag_ =iConfig.getParameter< std::vector<edm::InputTag> >("LeptonTag");
+	PrimVtxTag_=iConfig.getParameter<edm::InputTag>("srcPV");
+	eleTag_=iConfig.getParameter<edm::InputTag>("srcEle"); 
+	muonTag_=iConfig.getParameter<edm::InputTag>("srcMuon");
+	produces<int>("Leptons");
+	produces<int>("Electrons");
+        produces<int>("Muons");
 	/* Examples
 	 *   produces<ExampleData2>();
 	 * 
@@ -108,6 +115,37 @@ void
 LeptonInt::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
 	using namespace edm;
+	int Electrons=0;
+        int Muons=0;
+	edm::Handle<reco::VertexCollection> vtx_h;
+        iEvent.getByLabel(PrimVtxTag_, vtx_h);
+
+        edm::Handle<edm::View<pat::Electron> > eleHandle;
+        iEvent.getByLabel(eleTag_, eleHandle);
+	 if(eleHandle.isValid()){
+
+           for(unsigned int e=0; e<eleHandle->size(); ++e){
+         
+           if(fabs(eleHandle->at(e).eta())>2.5 ||eleHandle->at(e).pt()<10)continue;
+           	if(eleHandle->at(e).electronID("cutBasedElectronID-CSA14-PU20bx25-V0-standalone-veto")>0.5)++Electrons;
+           }
+         }
+
+	edm::Handle<edm::View<pat::Muon> > muonHandle;
+        iEvent.getByLabel(muonTag_, muonHandle);
+        if(muonHandle.isValid()){
+          for(unsigned int m=0; m<muonHandle->size(); ++m){
+          if(muonHandle->at(m).pt()<10 || fabs(muonHandle->at(m).eta())>2.5)continue;
+          float ChgIso=muonHandle->at(m).pfIsolationR04().sumChargedHadronPt;
+          float ChgPU=muonHandle->at(m).pfIsolationR04().sumPUPt;
+          float NeuIso=muonHandle->at(m).pfIsolationR04().sumNeutralHadronEt+
+          muonHandle->at(m).pfIsolationR04().sumPhotonEt;
+          float dBIsoMu= (ChgIso+std::max(0., NeuIso-0.5*ChgPU))/muonHandle->at(m).pt();
+         if(muonHandle->at(m).isTightMuon( vtx_h->at(0)) && dBIsoMu<0.2)++Muons;
+
+          }
+        }
+
 	int Leptons=0;
 	for(unsigned int i=0; i< leptonTag_.size();i++)
 	{
@@ -121,8 +159,13 @@ LeptonInt::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 	}
 
 	std::auto_ptr<int> htp(new int(Leptons));
-	iEvent.put(htp);
+	iEvent.put(htp, "Leptons");
 	
+	std::auto_ptr<int> htp1(new int(Electrons));
+        iEvent.put(htp1,"Electrons" );
+
+        std::auto_ptr<int> htp2(new int(Muons));
+        iEvent.put(htp2,"Muons" );
 }
 
 // ------------ method called once each job just before starting event loop  ------------

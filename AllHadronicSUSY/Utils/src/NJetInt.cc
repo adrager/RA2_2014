@@ -20,7 +20,7 @@
 
 // system include files
 #include <memory>
-
+#include "GoodJets.cc"
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/EDProducer.h"
@@ -31,7 +31,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DataFormats/JetReco/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/MET.h"
-
+#include "DataFormats/PatCandidates/interface/Jet.h"
 //
 // class declaration
 //
@@ -109,10 +109,16 @@ NJetInt::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
 	using namespace edm;
 	int NJets=0;
-	edm::Handle< edm::View<reco::Candidate> > Jets;
+	edm::Handle< edm::View<pat::Jet> > Jets;
 	iEvent.getByLabel(JetTag_,Jets);
 	if( Jets.isValid() ) {
-		NJets=Jets->size();
+	  	     	
+		//NJets=Jets->size();
+		for(unsigned int j=0; j<Jets->size(); ++j){
+			GoodJets gj(Jets->at(j));
+			if(!gj.isGood())continue;
+			++NJets;
+		}
 	}
 	else std::cout<<"NJetInt::Invlide Tag: "<<JetTag_.label()<<std::endl;
 	std::auto_ptr<int> htp(new int(NJets));
