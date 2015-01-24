@@ -256,7 +256,7 @@ numProcessedEvt=1000):
     from AllHadronicSUSY.Utils.leptonint_cfi import leptonint
     process.Leptons = leptonint.clone(
     LeptonTag = cms.VInputTag(cms.InputTag('selectedIDIsoMuons'),cms.InputTag('selectedIDIsoElectrons')),
-    srcEle = cms.InputTag("selectedIDIsoElectrons"),
+    srcEle = cms.InputTag("slimmedElectrons"),
     srcMuon = cms.InputTag("slimmedMuons"),
     srcPV=cms.InputTag("offlineSlimmedPrimaryVertices"), 
     )

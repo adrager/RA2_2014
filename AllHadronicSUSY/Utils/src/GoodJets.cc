@@ -8,10 +8,10 @@ isGood_=false;
         float phofrac=aJet.neutralEmEnergyFraction();//gives raw energy in the denominator
         float chgfrac=aJet.chargedHadronEnergyFraction();
         float chgEMfrac=aJet.chargedEmEnergyFraction();
-
-       // int nconstit=Jets->at(i).getPFConstituents().size();
+        float muFrac=aJet.muonEnergyFraction();
+        unsigned int nconstit=aJet.nConstituents();
         int chgmulti=aJet.chargedHadronMultiplicity();
-      	if( neufrac<0.99 && phofrac<0.99 &&chgmulti>0 && chgfrac>0 && chgEMfrac<0.99)isGood_=true;
+      	if(muFrac<0.99 && nconstit>1 && neufrac<0.99 && phofrac<0.99 &&chgmulti>0 && chgfrac>0 && chgEMfrac<0.99)isGood_=true;
 };
 bool isGood(){return isGood_;};
 private:

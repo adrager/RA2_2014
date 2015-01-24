@@ -48,7 +48,7 @@ private:
 	virtual void beginJob() ;
 	virtual void produce(edm::Event&, const edm::EventSetup&);
 	virtual void endJob() ;
-	
+        virtual bool EleVeto(const pat::Electron aEle,const reco::Vertex vtx);	
 	virtual void beginRun(edm::Run&, edm::EventSetup const&);
 	virtual void endRun(edm::Run&, edm::EventSetup const&);
 	virtual void beginLuminosityBlock(edm::LuminosityBlock&, edm::EventSetup const&);
@@ -120,15 +120,14 @@ LeptonInt::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 	edm::Handle<reco::VertexCollection> vtx_h;
         iEvent.getByLabel(PrimVtxTag_, vtx_h);
 
-        edm::Handle<edm::View<reco::Candidate> > eleHandle;
+        edm::Handle<edm::View<pat::Electron> > eleHandle;
         iEvent.getByLabel(eleTag_, eleHandle);
 	 if(eleHandle.isValid()){
 
            for(unsigned int e=0; e<eleHandle->size(); ++e){
          
            if(fabs(eleHandle->at(e).eta())>2.5 ||eleHandle->at(e).pt()<10)continue;
-           //	if(eleHandle->at(e).electronID("cutBasedElectronID-CSA14-PU20bx25-V0-standalone-veto")>0.5)
-           	++Electrons;
+           	if(EleVeto(eleHandle->at(e), vtx_h->at(0)))++Electrons;
            }
          }
 
@@ -169,6 +168,39 @@ LeptonInt::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
         iEvent.put(htp2,"Muons" );
 }
 
+bool LeptonInt::EleVeto(const pat::Electron aEle, const reco::Vertex vtx){
+bool vetoed=false;
+//float eta=aEle.eta();
+  // id variables
+     float sieie         = aEle.full5x5_sigmaIetaIeta();
+     bool convVeto       = aEle.passConversionVeto();
+     int mhits 		 = aEle.gsfTrack()->numberOfLostHits();
+     float dEtaIn        = aEle.deltaEtaSuperClusterTrackAtVtx();
+     float dPhiIn        = aEle.deltaPhiSuperClusterTrackAtVtx();
+     float hoe           = aEle.hadronicOverEm();
+     float ooemoop       = (1.0/aEle.ecalEnergy() - aEle.eSuperClusterOverP()/aEle.ecalEnergy());
+     float d0vtx         = 0.0;
+     float dzvtx         = 0.0;
+     reco::GsfElectron::PflowIsolationVariables pfIso = aEle.pfIsolationVariables();
+    // // Compute isolation with delta beta correction for PU
+    float absiso = pfIso.sumChargedHadronPt
+     + std::max(0.0 , pfIso.sumNeutralHadronEt + pfIso.sumPhotonEt - 0.5 * pfIso.sumPUPt );
+
+          d0vtx = aEle.gsfTrack()->dxy(vtx.position());
+	  dzvtx = aEle.gsfTrack()->dz(vtx.position());
+   absiso=absiso/aEle.pt(); 
+
+if(aEle.isEB()){
+	if(sieie< 0.011100 && fabs(dEtaIn)< 0.016315  && fabs(dPhiIn)< 0.252044 && hoe<0.345843 && absiso<0.164369 && ooemoop< 0.248070 && fabs(d0vtx)< 0.060279 && fabs(dzvtx)< 0.800538 && mhits<=2 && convVeto)vetoed=true;
+}
+else{
+        if(sieie<  0.033987  && fabs(dEtaIn)<  0.010671   && fabs(dPhiIn)<  0.245263  && hoe< 0.134691  && absiso< 0.212604  && ooemoop<  0.157160  && fabs(d0vtx)<  0.273097  && fabs(dzvtx)<  0.885860  && mhits<=3 && convVeto)vetoed=true;
+}
+
+
+
+return vetoed;
+}
 // ------------ method called once each job just before starting event loop  ------------
 void 
 LeptonInt::beginJob()
